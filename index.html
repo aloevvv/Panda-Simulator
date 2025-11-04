@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Panda Care Sim</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    .box { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+    button { margin: 5px; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h3>🐼 Panda</h3>
+  <p>Name: <span id="pandaNameDisplay">Pandy</span></p>
+  <input type="text" id="pandaNameInput" placeholder="Name your panda" />
+  <button onclick="renamePanda()">Rename</button>
+  <p>Mood: <span id="pandaMoodDisplay">Happy</span></p>
+  <p id="pandaMessage">Pandy looks at you curiously...</p>
+</div>
+
+<div class="box">
+  <h4>🐼 Panda Needs</h4>
+  <p>Hunger: <span id="pandaHungerDisplay">100</span>/100</p>
+  <p>Thirst: <span id="pandaThirstDisplay">100</span>/100</p>
+  <button onclick="feedPanda()">Feed Bamboo 🎋</button>
+  <button onclick="giveWater()">Give Water 💧</button>
+  <p id="pandaStatusMessage">Pandy is feeling great!</p>
+</div>
+
+<div class="box">
+  <h3>🎣 Bamboo Gathering</h3>
+  <button onclick="gatherBamboo()">Gather Bamboo (5💰)</button>
+  <p>Bamboo Inventory: <span id="bambooCount">0</span></p>
+</div>
+
+<div class="box">
+  <h3>🧴 Medicine Cabinet</h3>
+  <button onclick="giveMedicine()">Give Medicine 💊</button>
+  <p>Medicine Inventory: <span id="medicineCount">1</span></p>
+</div>
+
+<div class="box">
+  <h3>🧸 Toy Box</h3>
+  <button onclick="playWithToy()">Play with Toy 🎈</button>
+  <p>Toys: <span id="toyCount">1</span></p>
+</div>
+
+<script>
+  let pandaName = "Pandy";
+  let bambooInventory = 0;
+  let medicineInventory = 1;
+  let toyInventory = 1;
+  let pandaHunger = 100;
+  let pandaThirst = 100;
+  let pandaMood = "Happy";
+
+  function renamePanda() {
+    const input = document.getElementById("pandaNameInput").value;
+    if (input.trim() !== "") {
+      pandaName = input;
+      document.getElementById("pandaNameDisplay").textContent = pandaName;
+      document.getElementById("pandaMessage").textContent = `${pandaName} tilts their head at you.`;
+      updatePandaStatus();
+    }
+  }
+
+  function feedPanda() {
+    if (bambooInventory > 0 && pandaHunger < 100) {
+      bambooInventory--;
+      pandaHunger += 10;
+      if (pandaHunger > 100) pandaHunger = 100;
+      document.getElementById("pandaMessage").textContent = `${pandaName} munches happily on bamboo.`;
+    } else {
+      document.getElementById("pandaMessage").textContent = bambooInventory === 0
+        ? "No bamboo left! Go gather some."
+        : `${pandaName} isn't hungry right now.`;
+    }
+    updateMood();
+    updatePandaStatus();
+  }
+
+  function giveWater() {
+    if (pandaThirst < 100) {
+      pandaThirst += 10;
+      if (pandaThirst > 100) pandaThirst = 100;
+      document.getElementById("pandaMessage").textContent = `${pandaName} slurps water contentedly.`;
+    } else {
+      document.getElementById("pandaMessage").textContent = `${pandaName} isn't thirsty right now.`;
+    }
+    updateMood();
+    updatePandaStatus();
+  }
+
+  function gatherBamboo() {
+    bambooInventory++;
+    document.getElementById("pandaMessage").textContent = "You found a fresh stalk of bamboo!";
+    updatePandaStatus();
+  }
+
+  function giveMedicine() {
+    if (medicineInventory > 0 && pandaMood === "Sick") {
+      medicineInventory--;
+      pandaMood = "Happy";
+      document.getElementById("pandaMessage").textContent = `${pandaName} takes the medicine and starts to feel better.`;
+    } else if (pandaMood !== "Sick") {
+      document.getElementById("pandaMessage").textContent = `${pandaName} doesn't need medicine right now.`;
+    } else {
+      document.getElementById("pandaMessage").textContent = `You're out of medicine!`;
+    }
+    updatePandaStatus();
+  }
+
+  function playWithToy() {
+    if (toyInventory > 0) {
+      toyInventory--;
+      if (pandaMood === "Grumpy" || pandaMood === "Sad") {
+        pandaMood = "Playful";
+        document.getElementById("pandaMessage").textContent = `${pandaName} plays with the toy and cheers up!`;
+      } else {
+        document.getElementById("pandaMessage").textContent = `${pandaName} plays happily with the toy.`;
+      }
+    } else {
+      document.getElementById("pandaMessage").textContent = `No toys left!`;
+    }
+    updatePandaStatus();
+  }
+
+  function updateMood() {
+    if (pandaHunger < 30 || pandaThirst < 30) {
+      pandaMood = Math.random() < 0.3 ? "Sick" : "Sad";
+    } else if (pandaHunger > 80 && pandaThirst > 80) {
+      pandaMood = "Playful";
+    } else {
+      pandaMood = "Grumpy";
+    }
+
+    if (Math.random() < 0.05) {
+      pandaMood = "Sick";
+    }
+  }
+
+  function updatePandaStatus() {
+    document.getElementById("pandaHungerDisplay").textContent = pandaHunger;
+    document.getElementById("pandaThirstDisplay").textContent = pandaThirst;
+    document.getElementById("bambooCount").textContent = bambooInventory;
+    document.getElementById("medicineCount").textContent = medicineInventory;
+    document.getElementById("toyCount").textContent = toyInventory;
+    document.getElementById("pandaMoodDisplay").textContent = pandaMood;
+
+    let moodMessage = "";
+    switch (pandaMood) {
+      case "Happy":
+        moodMessage = `${pandaName} is feeling great!`;
+        break;
+      case "Sad":
+        moodMessage = `${pandaName} looks down... maybe they're hungry or thirsty.`;
+        break;
+      case "Sick":
+        moodMessage = `${pandaName} seems sick. You should take extra care.`;
+        break;
+      case "Playful":
+        moodMessage = `${pandaName} is bouncing around playfully!`;
+        break;
+      case "Grumpy":
+        moodMessage = `${pandaName} is grumpy. Maybe they need attention.`;
+        break;
+    }
+
+    document.getElementById("pandaStatusMessage").textContent = moodMessage;
+  }
+
+  setInterval(() => {
+    if (pandaHunger > 0) pandaHunger -= 1;
+    if (pandaThirst > 0) pandaThirst -= 1;
+    updateMood();
+    updatePandaStatus();
+  }, 60000); // every 60 seconds
+
+  updatePandaStatus();
+</script>
+
+</body>
+</html>
